@@ -1,19 +1,22 @@
 const Koa = require('koa')
 const Router = require('koa-router')
 const mongoose = require('mongoose')
+const db = require('./config/keys').mongoURI
 
 // 实例化一个koa对象
 const app = new Koa()
 const router = new Router()
 
-// 路由
+// 配置路由
 router.get('/', async ctx => {
   ctx.body = { msg: 'Hello Koa!' }
 })
 
+router.use('/api/users', require('./routes/api/users'))
+
 // 连接数据库
 mongoose
-  .connect('mongodb://127.0.0.1:27017/v_music', { useNewUrlParser: true })
+  .connect(db, { useNewUrlParser: true })
   .then(() => {
     console.log('数据库连接成功')
   })

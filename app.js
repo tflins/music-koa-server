@@ -1,11 +1,15 @@
 const Koa = require('koa')
 const Router = require('koa-router')
 const mongoose = require('mongoose')
+const bodyParser = require('koa-bodyparser')
 const db = require('./config/keys').mongoURI
 
 // 实例化一个koa对象
 const app = new Koa()
 const router = new Router()
+
+// 配置中间件
+app.use(bodyParser())
 
 // 配置路由
 router.get('/', async ctx => {

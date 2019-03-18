@@ -2,6 +2,7 @@ const Router = require('koa-router')
 const router = new Router()
 const User = require('../../models/User')
 const gravatar = require('gravatar')
+const tools = require('../../config/tools')
 
 /**
  * @router GET api/users/test
@@ -10,7 +11,7 @@ const gravatar = require('gravatar')
  */
 router.get('/test', async ctx => {
   ctx.status = 200
-  ctx.body = { msg: 'users 工作中' }
+  ctx.body = { msg: 'users 工作中…' }
 })
 
 /**
@@ -20,22 +21,27 @@ router.get('/test', async ctx => {
  */
 router.post('/register', async ctx => {
   // 保存进数据库
-  const findResult = await User.find({email: ctx.request.body.email})
+  const findResult = await User.find({ email: ctx.request.body.email })
   if (findResult.length) {
     ctx.status = 500
-    ctx.body = {msg: '用户已存在'}
+    ctx.body = { msg: '用户已存在' }
   } else {
     // 获取全球公认头像
-    const avatar = gravatar.url(ctx.request.body.email, {s: '200', r: 'pg', d: 'mm'})
+    const avatar = gravatar.url(ctx.request.body.email, {
+      s: '200',
+      r: 'pg',
+      d: 'mm'
+    })
     // 构造一个用户结构体
     const newUser = new User({
       name: ctx.request.body.name,
       email: ctx.request.body.email,
-      avatar: avatar,
-      password: ctx.request.body.password,
+      avatar,
+      password: tools.enbcrypt(ctx.request.body.password)
     })
     // 保存
-    await newUser.save()
+    await newUser
+      .save()
       .then(user => {
         ctx.body = user
       })

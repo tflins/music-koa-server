@@ -1,6 +1,7 @@
 const Router = require('koa-router')
 const router = new Router()
 const User = require('../../models/User')
+const gravatar = require('gravatar')
 
 /**
  * @router GET api/users/test
@@ -18,15 +19,19 @@ router.get('/test', async ctx => {
  * @access 接口是公开的
  */
 router.post('/register', async ctx => {
-  // 保存导数据库
+  // 保存进数据库
   const findResult = await User.find({email: ctx.request.body.email})
   if (findResult.length) {
     ctx.status = 500
     ctx.body = {msg: '用户已存在'}
   } else {
+    // 获取全球公认头像
+    const avatar = gravatar.url(ctx.request.body.email, {s: '200', r: 'pg', d: 'mm'})
+    // 构造一个用户结构体
     const newUser = new User({
       name: ctx.request.body.name,
       email: ctx.request.body.email,
+      avatar: avatar,
       password: ctx.request.body.password,
     })
     // 保存

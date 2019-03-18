@@ -11,6 +11,9 @@ const UserScheam = new Scheam({
     type: String,
     required: true
   },
+  avatar: {
+    type: String
+  },
   password: {
     type: String,
     required: true

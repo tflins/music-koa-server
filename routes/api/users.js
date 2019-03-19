@@ -4,6 +4,8 @@ const User = require('../../models/User')
 const gravatar = require('gravatar')
 const tools = require('../../config/tools')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const keys = require('../../config/keys')
 
 /**
  * @router GET api/users/test
@@ -66,15 +68,22 @@ router.post('/login', async ctx => {
     ctx.state = 404
     ctx.body = { email: '用户不存在！' }
   } else {
+    const user = findResult[0]
     // 查到后 验证密码
     const result = await bcrypt.compareSync(
       ctx.request.body.password,
-      findResult[0].password
+      user.password
     )
+    // 密码验证通过
     if (result) {
+      // 返回token
+      const payload = { id: user.id, name: user.name, avater: user.avatar }
+      const token = jwt.sign(payload, keys.secretOrKey, { expiresIn: 60 * 60 })
+
       ctx.state = 200
       ctx.body = {
-        success: true
+        success: true,
+        token: `Bearer ${token}`
       }
     } else {
       ctx.state = 400

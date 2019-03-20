@@ -63,7 +63,7 @@ router.post('/register', async ctx => {
  * @access 接口是公开的
  */
 router.post('/login', async ctx => {
-  const OK = false
+  let OK = false
   if (ctx.request.body.email === 'tflins@163.com' && ctx.request.body.password === '123456') {
     OK = true
   }

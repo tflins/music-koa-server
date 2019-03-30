@@ -6,6 +6,7 @@ const tools = require('../../config/tools')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys')
+const Message = require('../../config/MessageClass')
 
 /**
  * @router GET api/users/test
@@ -23,12 +24,15 @@ router.get('/test', async ctx => {
  * @access 接口是公开的
  */
 router.post('/register', async ctx => {
-  console.log(ctx.request.body.email)
   // 保存进数据库
   const findResult = await User.find({ email: ctx.request.body.email })
   if (findResult.length) {
     ctx.status = 500
-    ctx.body = { msg: '用户已存在' }
+    ctx.body = new Message({
+      success: false,
+      data: {},
+      msg: '用户已存在！'
+    })
   } else {
     // 获取全球公认头像
     const avatar = gravatar.url(ctx.request.body.email, {
@@ -53,7 +57,11 @@ router.post('/register', async ctx => {
         throw err
       })
     // 返回json数据
-    ctx.body = newUser
+    ctx.body = new Message({
+      success: true,
+      data: newUser,
+      msg: '注册成功！'
+    })
   }
 })
 
@@ -71,7 +79,11 @@ router.post('/login', async ctx => {
   const findResult = await User.find({ email: ctx.request.body.email })
   if (!findResult.length) {
     ctx.state = 404
-    ctx.body = { email: '用户不存在！' }
+    ctx.body = new Message({
+      success: false,
+      data: {},
+      msg: '用户不存在！'
+    })
   } else {
     const user = findResult[0]
     // 查到后 验证密码
@@ -86,15 +98,20 @@ router.post('/login', async ctx => {
       const token = jwt.sign(payload, keys.secretOrKey, { expiresIn: 60 * 60 })
 
       ctx.state = 200
-      ctx.body = {
+      ctx.body = new Message({
         success: true,
-        token: `Bearer ${token}`
-      }
+        data: {
+          token: `Bearer ${token}`
+        },
+        msg: '登录成功！'
+      })
     } else {
       ctx.state = 400
-      ctx.body = {
-        password: '密码错误！'
-      }
+      ctx.body = new Message({
+        success: false,
+        data: {},
+        msg: '密码错误！'
+      })
     }
   }
 })

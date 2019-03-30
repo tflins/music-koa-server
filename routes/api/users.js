@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys')
 const Message = require('../../config/MessageClass')
 
+const pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+
 /**
  * @router GET api/users/test
  * @desc 测试接口地址
@@ -24,6 +26,15 @@ router.get('/test', async ctx => {
  * @access 接口是公开的
  */
 router.post('/register', async ctx => {
+  if (!pattern.test(ctx.request.body.email)) {
+    ctx.status = 200
+    ctx.body = new Message({
+      success: false,
+      data: {},
+      msg: '请输入正确的邮箱！'
+    })
+    return
+  }
   // 保存进数据库
   const findResult = await User.find({ email: ctx.request.body.email })
   if (findResult.length) {

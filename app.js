@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const bodyParser = require('koa-bodyparser')
 const db = require('./config/keys').mongoURI
 const cors = require('koa2-cors')
+const passport = require('koa-passport')
 
 // 实例化一个koa对象
 const app = new Koa()
@@ -30,6 +31,12 @@ mongoose
     console.log('数据库连接失败')
     throw err
   })
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+// 回调到 config/passport.js 
+require('./config/passport')(passport)
 
 // 加载路由中间件
 app.use(router.routes()).use(router.allowedMethods())

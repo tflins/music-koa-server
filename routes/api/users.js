@@ -7,8 +7,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys')
 const Message = require('../../config/MessageClass')
+const passport = require('koa-passport')
 
-const pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+const pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/
 
 /**
  * @router GET api/users/test
@@ -83,7 +84,10 @@ router.post('/register', async ctx => {
  */
 router.post('/login', async ctx => {
   let OK = false
-  if (ctx.request.body.email === 'tflins@163.com' && ctx.request.body.password === '123456') {
+  if (
+    ctx.request.body.email === 'tflins@163.com' &&
+    ctx.request.body.password === '123456'
+  ) {
     OK = true
   }
   // 查询当前登录邮箱是否在数据库中
@@ -126,5 +130,27 @@ router.post('/login', async ctx => {
     }
   }
 })
+
+/**
+ * @router GET api/users/updetapassword
+ * @desc 获取用户信息
+ * @access 接口是私有的
+ */
+router.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  async ctx => {
+    ctx.body = new Message({
+      success: true,
+      data: {
+        id: ctx.state.user.id,
+        name: ctx.state.user.name,
+        email: ctx.state.user.email,
+        avatar: ctx.state.user.avatar
+      },
+      msg: '请求成功！'
+    })
+  }
+)
 
 module.exports = router.routes()

@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys')
 const Message = require('../../config/MessageClass')
 const passport = require('koa-passport')
+const SongList = require('../../models/SongList')
 
 const pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/
 
@@ -150,6 +151,54 @@ router.get(
       },
       msg: '请求成功！'
     })
+  }
+)
+
+/**
+ * @router POST api/users/createsonglist
+ * @desc 创建歌单
+ * @access 接口是私有的
+ */
+router.post(
+  '/createsonglist',
+  passport.authenticate('jwt', { session: false }),
+  async ctx => {
+    console.log(ctx.request.body)
+    let songListInfo = ctx.request.body
+    // 查看是否有同名歌单
+    const findResult = await SongList.find({ name: songListInfo.name })
+    if (findResult.length) {
+      ctx.state = 404
+      ctx.body = new Message({
+        success: false,
+        data: {},
+        msg: '歌单已存在!'
+      })
+    } else {
+      // 存入数据库
+      // 构造一个用户结构体
+      const newSongList = new SongList({
+        userId: ctx.state.user.id,
+        name: songListInfo.name,
+        desc: ctx.state.user.desc,
+        list: []
+      })
+      // 保存
+      await newSongList
+        .save()
+        .then(user => {
+          ctx.body = user
+        })
+        .catch(err => {
+          throw err
+        })
+      // 返回json数据
+      ctx.body = new Message({
+        success: true,
+        data: newSongList,
+        msg: '添加歌单成功!'
+      })
+    }
   }
 )
 

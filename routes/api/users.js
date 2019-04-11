@@ -163,7 +163,6 @@ router.post(
   '/createsonglist',
   passport.authenticate('jwt', { session: false }),
   async ctx => {
-    console.log(ctx.request.body)
     let songListInfo = ctx.request.body
     // 查看是否有同名歌单
     const findResult = await SongList.find({ name: songListInfo.name })
@@ -197,6 +196,33 @@ router.post(
         success: true,
         data: newSongList,
         msg: '添加歌单成功!'
+      })
+    }
+  }
+)
+
+/**
+ * @router GET api/users/getsonglist
+ * @desc 获取用户创建的歌单
+ * @access 接口是私有的
+ */
+router.get(
+  '/getsonglist',
+  passport.authenticate('jwt', { session: false }),
+  async ctx => {
+    // 从数据库中查询
+    const findResult = await SongList.find({ userId: ctx.state.user.id })
+    if (findResult.length) {
+      ctx.body = new Message({
+        success: true,
+        data: findResult,
+        msg: '查询成功!'
+      })
+    } else {
+      ctx.body = new Message({
+        success: false,
+        data: findResult,
+        msg: '无数据!'
       })
     }
   }

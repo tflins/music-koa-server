@@ -228,4 +228,49 @@ router.get(
   }
 )
 
+/**
+ * @router POST api/users/savesonglist
+ * @desc 添加歌曲到歌单
+ * @access 接口是私有的
+ */
+router.post(
+  '/savesonglist',
+  passport.authenticate('jwt', { session: false }),
+  async ctx => {
+    // 数据库中是否有相应歌单
+    console.log(ctx.request.body.song)
+    const findResult = await SongList.findById(ctx.request.body.id)
+    if (JSON.stringify(findResult) !== '{}') {
+      // 更新歌单
+      const updataResult = await SongList.update(
+        { _id: ctx.request.body.id },
+        {
+          $addToSet: {
+            list: ctx.request.body.song
+          }
+        }
+      )
+      if (updataResult.ok) {
+        ctx.body = new Message({
+          success: true,
+          data: {},
+          msg: '添加成功!'
+        })
+      } else {
+        ctx.body = new Message({
+          success: false,
+          data: {},
+          msg: '添加失败!'
+        })
+      }
+    } else {
+      ctx.body = new Message({
+        success: false,
+        data: {},
+        msg: '歌单不存在!'
+      })
+    }
+  }
+)
+
 module.exports = router.routes()

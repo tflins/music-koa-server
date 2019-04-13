@@ -273,4 +273,33 @@ router.post(
   }
 )
 
+/**
+ * @router GET api/users/onesonglist
+ * @desc 根据id获取歌单
+ * @access 接口是私有的
+ */
+router.get(
+  '/onesonglist',
+  passport.authenticate('jwt', { session: false }),
+  async ctx => {
+    // 从数据库中查询
+    const findResult = await SongList.findById(ctx.request.query.id)
+    if (JSON.stringify(findResult) !== '{}') {
+      ctx.state = 200
+      ctx.body = new Message({
+        success: true,
+        data: findResult,
+        msg: 'OK!'
+      })
+    } else {
+      ctx.state = 404
+      ctx.body = new Message({
+        success: false,
+        data: {},
+        msg: '歌单不存在!'
+      })
+    }
+  }
+)
+
 module.exports = router.routes()
